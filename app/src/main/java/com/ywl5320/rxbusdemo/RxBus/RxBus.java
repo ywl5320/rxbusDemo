@@ -1,5 +1,8 @@
-package com.ywl5320.rxbusdemo.RxBus;
+package com.bd.bdgames.bus;
 
+import android.support.annotation.NonNull;
+
+import com.bd.bdgames.utils.CommonUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,10 +44,10 @@ public class RxBus {
      */
     public void post(String tag, Object object)
     {
+        _bus.onNext(object);
         if(!tags.containsKey(tag))
         {
             tags.put(tag, object);
-            _bus.onNext(object);
         }
     }
 
@@ -55,15 +58,14 @@ public class RxBus {
      */
     public void toObserverableOnMainThread(final String tag, final RxBusResult rxBusResult) {
 
-            _bus.observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
-                @Override
-                public void call(Object o) {
-                    if (tags.containsKey(tag)) {
-                        rxBusResult.onRxBusResult(o);
-                        tags.remove(tag);
-                    }
+        _bus.observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
+            @Override
+            public void call(Object o) {
+                if (tags.containsKey(tag)) {
+                    rxBusResult.onRxBusResult(o);
                 }
-            });
+            }
+        });
     }
 
     /**
@@ -78,7 +80,6 @@ public class RxBus {
             public void call(Object o) {
                 if (tags.containsKey(tag)) {
                     rxBusResult.onRxBusResult(o);
-                    tags.remove(tag);
                 }
             }
         });
@@ -90,10 +91,10 @@ public class RxBus {
      */
     public void removeObserverable(String tag)
     {
-            if(tags.containsKey(tag))
-            {
-                tags.remove(tag);
-            }
+        if(tags.containsKey(tag))
+        {
+            tags.remove(tag);
+        }
     }
 
     /**
