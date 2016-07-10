@@ -72,7 +72,7 @@ public class RxBus {
             public void call(Object o) {
                 if (sendtags.containsKey(tag)) {
                     rxBusResult.onRxBusResult(sendtags.get(tag));
-                    sendtags.remove(tag);
+                    //sendtags.remove(tag);
                 }
             }
         });
@@ -90,7 +90,7 @@ public class RxBus {
             public void call(Object o) {
                 if (sendtags.containsKey(tag)) {
                     rxBusResult.onRxBusResult(sendtags.get(tag));
-                    sendtags.remove(tag);
+                    //sendtags.remove(tag);
                 }
             }
         });
