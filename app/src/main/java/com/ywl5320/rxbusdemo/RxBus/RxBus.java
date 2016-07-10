@@ -20,7 +20,8 @@ import rx.subjects.Subject;
 public class RxBus {
 
     private final Subject<Object, Object> _bus = new SerializedSubject<>(PublishSubject.create());
-    private final Map<String, Object> tags = new HashMap<>();
+    private final Map<String, Object> tags = new HashMap<>(); //post队列
+    private final Map<String, Object> sendtags = new HashMap<>(); //结果发送队列
 
     private static RxBus rxbus;
 
@@ -44,10 +45,18 @@ public class RxBus {
      */
     public void post(String tag, Object object)
     {
-        _bus.onNext(object);
         if(!tags.containsKey(tag))
         {
             tags.put(tag, object);
+            _bus.onNext(object);
+            sendtags.put(tag, object);
+        }
+        else
+        {
+            tags.remove(tag);
+            tags.put(tag, object);
+            _bus.onNext(object);
+            sendtags.put(tag, object);
         }
     }
 
@@ -61,8 +70,9 @@ public class RxBus {
         _bus.observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
             @Override
             public void call(Object o) {
-                if (tags.containsKey(tag)) {
-                    rxBusResult.onRxBusResult(o);
+                if (sendtags.containsKey(tag)) {
+                    rxBusResult.onRxBusResult(sendtags.get(tag));
+                    sendtags.remove(tag);
                 }
             }
         });
@@ -78,8 +88,9 @@ public class RxBus {
         _bus.observeOn(Schedulers.io()).subscribe(new Action1<Object>() {
             @Override
             public void call(Object o) {
-                if (tags.containsKey(tag)) {
-                    rxBusResult.onRxBusResult(o);
+                if (sendtags.containsKey(tag)) {
+                    rxBusResult.onRxBusResult(sendtags.get(tag));
+                    sendtags.remove(tag);
                 }
             }
         });
@@ -95,6 +106,10 @@ public class RxBus {
         {
             tags.remove(tag);
         }
+        if(sendtags.containsKey(tag))
+        {
+            sendtags.remove(tag);
+        }
     }
 
     /**
@@ -103,6 +118,7 @@ public class RxBus {
     public void release()
     {
         tags.clear();
+        sendtags.clear();
         rxbus = null;
     }
 
